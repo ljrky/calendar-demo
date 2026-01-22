@@ -1,0 +1,321 @@
+/* Mobile First Approach - Base styles are for mobile */
+
+/* Small Mobile (< 480px) */
+@media (max-width: 479px) {
+    .container {
+        padding: var(--spacing-sm);
+    }
+
+    .app-header {
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md) 0;
+    }
+
+    .app-header h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .calendar-container {
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+    }
+
+    .calendar-header {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .current-month {
+        font-size: var(--font-size-lg);
+    }
+
+    .nav-button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .weekday {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs);
+    }
+
+    .day-cell {
+        min-height: 60px;
+        padding: var(--spacing-xs);
+    }
+
+    .day-number {
+        font-size: var(--font-size-sm);
+    }
+
+    .event-badge {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+}
+
+/* Mobile (< 640px) */
+@media (max-width: 639px) {
+    /* Modal - Full Screen on Mobile */
+    .modal-overlay {
+        padding: 0;
+    }
+
+    .modal-container {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .event-form {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+        padding: var(--spacing-md);
+        background-color: var(--color-bg-secondary);
+        border-radius: 0;
+        position: sticky;
+        bottom: 0;
+    }
+
+    .form-actions .button {
+        width: 100%;
+    }
+
+    .form-actions .button-danger {
+        margin-right: 0;
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* Calendar Grid Adjustments */
+    .calendar-grid {
+        gap: 2px;
+    }
+
+    .day-cell {
+        border-radius: var(--radius-sm);
+    }
+
+    /* Reduce spacing */
+    .event-indicators {
+        gap: 2px;
+    }
+
+    .event-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    /* Hide full weekday names on very small screens */
+    .weekday {
+        font-size: 10px;
+    }
+}
+
+/* Tablet (640px - 1024px) */
+@media (min-width: 640px) and (max-width: 1024px) {
+    .container {
+        padding: var(--spacing-lg);
+    }
+
+    .calendar-container {
+        padding: var(--spacing-lg);
+    }
+
+    .day-cell {
+        min-height: 90px;
+    }
+
+    .modal-container {
+        max-width: 500px;
+    }
+}
+
+/* Desktop (> 1024px) */
+@media (min-width: 1025px) {
+    .calendar-container {
+        padding: var(--spacing-2xl);
+    }
+
+    .day-cell {
+        min-height: 100px;
+    }
+
+    .day-cell:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Show more event details on larger screens */
+    .event-badge {
+        max-width: 120px;
+    }
+}
+
+/* Landscape Mobile Devices */
+@media (max-height: 500px) and (orientation: landscape) {
+    .modal-container {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .modal-header {
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .event-form {
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+/* Large Desktop (> 1440px) */
+@media (min-width: 1441px) {
+    .calendar-container {
+        max-width: 1100px;
+    }
+
+    .day-cell {
+        min-height: 120px;
+    }
+
+    .current-month {
+        font-size: var(--font-size-3xl);
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .event-dot,
+    .event-badge,
+    .event-count {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .app-header,
+    .calendar-header,
+    .nav-button,
+    .modal-overlay {
+        display: none !important;
+    }
+
+    .calendar-container {
+        box-shadow: none;
+        border: 1px solid var(--color-border);
+    }
+
+    .day-cell {
+        page-break-inside: avoid;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Dark Mode Support (Optional - Ready for future implementation) */
+@media (prefers-color-scheme: dark) {
+    /* Uncomment and customize when implementing dark mode */
+    /*
+    :root {
+        --color-bg: #1e293b;
+        --color-bg-secondary: #0f172a;
+        --color-bg-tertiary: #334155;
+        --color-border: #334155;
+        --color-text: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-text-light: #64748b;
+    }
+    */
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Increase tap target sizes */
+    .day-cell {
+        min-height: 70px;
+    }
+
+    .nav-button,
+    .close-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .color-option {
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    /* Remove hover effects on touch devices */
+    .day-cell:hover {
+        transform: none;
+    }
+
+    .nav-button:hover {
+        background-color: var(--color-bg-tertiary);
+        color: var(--color-text);
+    }
+
+    /* Add active states for touch feedback */
+    .day-cell:active {
+        background-color: var(--color-bg-tertiary);
+    }
+
+    .button:active {
+        transform: scale(0.97);
+    }
+}
+
+/* iPad Specific */
+@media only screen
+    and (min-device-width: 768px)
+    and (max-device-width: 1024px)
+    and (-webkit-min-device-pixel-ratio: 2) {
+
+    .calendar-container {
+        max-width: 700px;
+    }
+
+    .day-cell {
+        min-height: 85px;
+    }
+}
+
+/* Accessibility - High Contrast Mode */
+@media (prefers-contrast: high) {
+    .day-cell {
+        border-width: 2px;
+    }
+
+    .button {
+        border-width: 2px;
+    }
+
+    .event-badge,
+    .event-count {
+        border: 2px solid currentColor;
+    }
+}
