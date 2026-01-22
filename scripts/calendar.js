@@ -21,6 +21,7 @@ const Calendar = {
     attachNavigationListeners() {
         const prevButton = document.getElementById('prevMonth');
         const nextButton = document.getElementById('nextMonth');
+        const todayButton = document.getElementById('todayButton');
 
         prevButton?.addEventListener('click', () => {
             this.previousMonth();
@@ -28,6 +29,10 @@ const Calendar = {
 
         nextButton?.addEventListener('click', () => {
             this.nextMonth();
+        });
+
+        todayButton?.addEventListener('click', () => {
+            this.goToToday();
         });
     },
 
@@ -166,19 +171,19 @@ const Calendar = {
         const container = document.createElement('div');
         container.className = 'event-indicators';
 
-        if (events.length === 1) {
-            // Show single event badge
-            const badge = this.createEventBadge(events[0]);
+        const maxVisible = 3;
+        const visibleEvents = events.slice(0, maxVisible);
+        const remainingCount = events.length - maxVisible;
+
+        // Show up to 3 events
+        visibleEvents.forEach(event => {
+            const badge = this.createEventBadge(event);
             container.appendChild(badge);
-        } else if (events.length === 2) {
-            // Show two event badges
-            events.forEach(event => {
-                const badge = this.createEventBadge(event);
-                container.appendChild(badge);
-            });
-        } else {
-            // Show count badge for 3+ events
-            const countBadge = this.createCountBadge(events.length);
+        });
+
+        // Show "+X more" for additional events
+        if (remainingCount > 0) {
+            const countBadge = this.createCountBadge(remainingCount);
             container.appendChild(countBadge);
 
             // Add click handler to show all events
@@ -195,7 +200,7 @@ const Calendar = {
     createEventBadge(event) {
         const badge = document.createElement('div');
         badge.className = 'event-badge';
-        badge.style.backgroundColor = event.color;
+        badge.dataset.color = event.color;
         badge.textContent = event.title;
         badge.dataset.eventId = event.id;
         badge.title = this.getEventTooltip(event);
@@ -213,8 +218,8 @@ const Calendar = {
     createCountBadge(count) {
         const badge = document.createElement('div');
         badge.className = 'event-count';
-        badge.textContent = `${count} events`;
-        badge.title = `${count} events on this day`;
+        badge.textContent = `+${count} more`;
+        badge.title = `${count} more events on this day`;
         return badge;
     },
 
