@@ -34,7 +34,7 @@ const Modal = {
 
         // ESC key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.overlay?.classList.contains('active')) {
+            if (e.key === 'Escape' && !this.overlay?.classList.contains('hidden')) {
                 this.close();
             }
         });
@@ -152,7 +152,8 @@ const Modal = {
 
     // Open modal
     open() {
-        this.overlay?.classList.add('active');
+        this.overlay?.classList.remove('hidden');
+        this.overlay?.classList.add('flex', 'animate-fade-in');
         document.body.classList.add('modal-open');
 
         // Focus first input field
@@ -162,7 +163,8 @@ const Modal = {
 
     // Close modal
     close() {
-        this.overlay?.classList.remove('active');
+        this.overlay?.classList.add('hidden');
+        this.overlay?.classList.remove('flex', 'animate-fade-in');
         document.body.classList.remove('modal-open');
 
         // Reset form after animation

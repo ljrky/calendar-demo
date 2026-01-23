@@ -122,23 +122,29 @@ const Calendar = {
     // Create empty cell
     createEmptyCell() {
         const cell = document.createElement('div');
-        cell.className = 'day-cell empty';
+        cell.className = 'day-cell relative min-h-[70px] sm:min-h-[80px] md:min-h-[100px] lg:min-h-[120px] xl:min-h-[140px] bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 border-l-0 border-t-0 p-1 sm:p-2 flex flex-col overflow-hidden [&:nth-child(7n+1)]:border-l';
         return cell;
     },
 
     // Create day cell
     createDayCell(day, dateString) {
         const cell = document.createElement('div');
-        cell.className = 'day-cell';
+        cell.className = 'day-cell relative min-h-[70px] sm:min-h-[80px] md:min-h-[100px] lg:min-h-[120px] xl:min-h-[140px] bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 border-l-0 border-t-0 p-1 sm:p-2 cursor-pointer transition-colors duration-150 flex flex-col overflow-hidden hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset focus:z-10 [&:nth-child(7n+1)]:border-l';
 
-        // Add today class if applicable
-        if (this.isToday(this.currentYear, this.currentMonth, day)) {
-            cell.classList.add('today');
-        }
+        // Add tabindex for keyboard navigation
+        cell.setAttribute('tabindex', '0');
+        cell.setAttribute('role', 'button');
+        cell.setAttribute('aria-label', `${this.monthNames[this.currentMonth]} ${day}, ${this.currentYear}`);
 
         // Day number
         const dayNumber = document.createElement('div');
-        dayNumber.className = 'day-number';
+
+        // Add today styling if applicable
+        if (this.isToday(this.currentYear, this.currentMonth, day)) {
+            dayNumber.className = 'day-number text-[11px] sm:text-xs font-medium mb-1 self-start flex items-center justify-center min-w-[22px] sm:min-w-[26px] h-[22px] sm:h-[26px] bg-blue-600 text-white rounded-full';
+        } else {
+            dayNumber.className = 'day-number text-[11px] sm:text-xs font-normal text-slate-800 dark:text-slate-200 mb-1 self-start flex items-center justify-center min-w-[22px] sm:min-w-[26px] h-[22px] sm:h-[26px]';
+        }
         dayNumber.textContent = day;
         cell.appendChild(dayNumber);
 
@@ -169,7 +175,7 @@ const Calendar = {
     // Create event indicators
     createEventIndicators(events) {
         const container = document.createElement('div');
-        container.className = 'event-indicators';
+        container.className = 'event-indicators flex flex-col gap-0.5 flex-1 overflow-hidden';
 
         const maxVisible = 3;
         const visibleEvents = events.slice(0, maxVisible);
@@ -199,7 +205,7 @@ const Calendar = {
     // Create event badge
     createEventBadge(event) {
         const badge = document.createElement('div');
-        badge.className = 'event-badge';
+        badge.className = 'event-badge flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer transition-opacity duration-150 leading-tight hover:opacity-80';
         badge.dataset.color = event.color;
         badge.textContent = event.title;
         badge.dataset.eventId = event.id;
@@ -217,7 +223,7 @@ const Calendar = {
     // Create count badge
     createCountBadge(count) {
         const badge = document.createElement('div');
-        badge.className = 'event-count';
+        badge.className = 'event-count inline-flex items-center justify-center px-1.5 py-0.5 text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-medium cursor-pointer mt-0.5 hover:text-slate-800 dark:hover:text-slate-200';
         badge.textContent = `+${count} more`;
         badge.title = `${count} more events on this day`;
         return badge;

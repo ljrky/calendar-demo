@@ -264,18 +264,20 @@ const Validation = {
     showError(fieldName, message) {
         const errorElement = document.getElementById(`${fieldName}Error`);
         const inputElement = document.getElementById(`event${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`);
-        const formGroup = inputElement?.closest('.form-group');
 
         if (errorElement) {
             errorElement.textContent = message;
         }
 
-        if (formGroup) {
+        if (inputElement) {
             if (message) {
-                formGroup.classList.add('has-error');
-                formGroup.classList.remove('has-success');
+                // Add error styling with Tailwind classes
+                inputElement.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500/20');
+                inputElement.classList.remove('border-slate-300', 'dark:border-slate-500', 'focus:border-blue-500', 'focus:ring-blue-500/20', 'border-green-500');
             } else {
-                formGroup.classList.remove('has-error');
+                // Remove error styling
+                inputElement.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500/20');
+                inputElement.classList.add('border-slate-300', 'dark:border-slate-500', 'focus:border-blue-500', 'focus:ring-blue-500/20');
             }
         }
     },

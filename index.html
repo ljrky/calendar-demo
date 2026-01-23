@@ -1,36 +1,223 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark:bg-slate-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar App</title>
 
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/calendar.css">
-    <link rel="stylesheet" href="styles/modal.css">
-    <link rel="stylesheet" href="styles/responsive.css">
+    <!-- Tailwind CSS v4 Play CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            /* Colors */
+            --color-primary: #3b82f6;
+            --color-primary-dark: #2563eb;
+            --color-danger: #ef4444;
+            --color-danger-dark: #dc2626;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+
+            /* Event Colors */
+            --color-event-blue: #e8f0fe;
+            --color-event-blue-text: #1967d2;
+            --color-event-red: #fce8e6;
+            --color-event-red-text: #c5221f;
+            --color-event-green: #e6f4ea;
+            --color-event-green-text: #137333;
+            --color-event-orange: #fef7e0;
+            --color-event-orange-text: #e37400;
+            --color-event-purple: #f3e8fd;
+            --color-event-purple-text: #8430ce;
+            --color-event-pink: #fce7f3;
+            --color-event-pink-text: #c2185b;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 200ms ease-in-out;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 300ms ease-in-out;
+        }
+
+        .animate-spin {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 9999px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
+
+        /* Dark mode scrollbar */
+        .dark .custom-scrollbar {
+            scrollbar-color: #4b5563 transparent;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
+
+        /* Event badge color variations */
+        .event-badge[data-color="#3b82f6"] {
+            background-color: var(--color-event-blue);
+            color: var(--color-event-blue-text);
+        }
+        .event-badge[data-color="#ef4444"] {
+            background-color: var(--color-event-red);
+            color: var(--color-event-red-text);
+        }
+        .event-badge[data-color="#10b981"] {
+            background-color: var(--color-event-green);
+            color: var(--color-event-green-text);
+        }
+        .event-badge[data-color="#f59e0b"] {
+            background-color: var(--color-event-orange);
+            color: var(--color-event-orange-text);
+        }
+        .event-badge[data-color="#8b5cf6"] {
+            background-color: var(--color-event-purple);
+            color: var(--color-event-purple-text);
+        }
+        .event-badge[data-color="#ec4899"] {
+            background-color: var(--color-event-pink);
+            color: var(--color-event-pink-text);
+        }
+
+        /* Dark mode event colors */
+        .dark .event-badge[data-color="#3b82f6"] {
+            background-color: #1e3a5f;
+            color: #93c5fd;
+        }
+        .dark .event-badge[data-color="#ef4444"] {
+            background-color: #4c1d1d;
+            color: #fca5a5;
+        }
+        .dark .event-badge[data-color="#10b981"] {
+            background-color: #14412b;
+            color: #6ee7b7;
+        }
+        .dark .event-badge[data-color="#f59e0b"] {
+            background-color: #4a3416;
+            color: #fcd34d;
+        }
+        .dark .event-badge[data-color="#8b5cf6"] {
+            background-color: #3b2962;
+            color: #c4b5fd;
+        }
+        .dark .event-badge[data-color="#ec4899"] {
+            background-color: #4a1d3d;
+            color: #f9a8d4;
+        }
+
+        /* Focus visible for accessibility */
+        .focus-ring:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Hide radio buttons visually but keep accessible */
+        .color-picker input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Color option checked state */
+        .color-picker input[type="radio"]:checked + label {
+            border-color: #1e293b;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
+        }
+
+        .dark .color-picker input[type="radio"]:checked + label {
+            border-color: #f1f5f9;
+            box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px currentColor;
+        }
+
+        .color-picker input[type="radio"]:focus + label {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Body modal open state */
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <header class="app-header">
+<body class="font-sans text-slate-800 bg-slate-100 dark:bg-slate-900 dark:text-slate-200 min-h-screen antialiased">
+    <div class="min-h-screen flex flex-col">
+        <header class="hidden">
             <h1>Calendar App</h1>
         </header>
 
-        <main class="calendar-container">
+        <main class="bg-white dark:bg-slate-800 flex-1 flex flex-col">
             <!-- Calendar Header with Navigation -->
-            <div class="calendar-header">
-                <button class="today-button" id="todayButton">Today</button>
+            <div class="flex items-center justify-between px-4 py-3 md:px-6 gap-3 border-b border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 no-print">
+                <button class="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-500 rounded text-sm font-medium cursor-pointer transition-all duration-150 hover:bg-slate-100 dark:hover:bg-slate-600 focus-ring min-h-[36px]" id="todayButton">Today</button>
 
-                <button class="nav-button" id="prevMonth" aria-label="Previous month">
+                <button class="flex items-center justify-center w-10 h-10 bg-transparent text-slate-500 dark:text-slate-400 rounded-full transition-all duration-150 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200 active:scale-95 focus-ring" id="prevMonth" aria-label="Previous month">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
                     </svg>
                 </button>
 
-                <h2 class="current-month" id="currentMonth">January 2026</h2>
+                <h2 class="text-lg md:text-xl xl:text-2xl font-normal text-slate-800 dark:text-slate-200 text-center flex-1" id="currentMonth">January 2026</h2>
 
-                <button class="nav-button" id="nextMonth" aria-label="Next month">
+                <button class="flex items-center justify-center w-10 h-10 bg-transparent text-slate-500 dark:text-slate-400 rounded-full transition-all duration-150 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200 active:scale-95 focus-ring" id="nextMonth" aria-label="Next month">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
                     </svg>
@@ -38,96 +225,96 @@
             </div>
 
             <!-- Weekday Headers -->
-            <div class="weekday-headers">
-                <div class="weekday">Sun</div>
-                <div class="weekday">Mon</div>
-                <div class="weekday">Tue</div>
-                <div class="weekday">Wed</div>
-                <div class="weekday">Thu</div>
-                <div class="weekday">Fri</div>
-                <div class="weekday">Sat</div>
+            <div class="grid grid-cols-7 border-b border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+                <div class="text-center text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 py-2 uppercase tracking-wider">Sun</div>
+                <div class="text-center text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 py-2 uppercase tracking-wider">Mon</div>
+                <div class="text-center text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 py-2 uppercase tracking-wider">Tue</div>
+                <div class="text-center text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 py-2 uppercase tracking-wider">Wed</div>
+                <div class="text-center text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 py-2 uppercase tracking-wider">Thu</div>
+                <div class="text-center text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 py-2 uppercase tracking-wider">Fri</div>
+                <div class="text-center text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 py-2 uppercase tracking-wider">Sat</div>
             </div>
 
             <!-- Calendar Grid -->
-            <div class="calendar-grid" id="calendarGrid">
+            <div class="calendar-grid grid grid-cols-7 flex-1 bg-white dark:bg-slate-800" id="calendarGrid">
                 <!-- Day cells will be generated dynamically by JavaScript -->
             </div>
         </main>
     </div>
 
     <!-- Event Modal -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Add Event</h3>
-                <button class="close-button" id="closeModal" aria-label="Close modal">
+    <div class="modal-overlay fixed inset-0 bg-black/50 dark:bg-black/70 hidden items-center justify-center z-50 p-4 sm:p-4 overflow-y-auto" id="modalOverlay">
+        <div class="modal-container bg-white dark:bg-slate-800 rounded-lg sm:rounded-xl shadow-2xl w-full max-w-[600px] max-h-[90vh] sm:max-h-[90vh] overflow-y-auto z-50 animate-slide-up custom-scrollbar max-sm:rounded-none max-sm:max-h-full max-sm:h-full max-sm:flex max-sm:flex-col">
+            <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-600">
+                <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-200" id="modalTitle">Add Event</h3>
+                <button class="flex items-center justify-center w-9 h-9 bg-transparent text-slate-500 dark:text-slate-400 rounded-lg cursor-pointer transition-all duration-150 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200 focus-ring" id="closeModal" aria-label="Close modal">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M6.225 4.811a1 1 0 00-1.414 1.414L10.586 12 4.81 17.775a1 1 0 101.414 1.414L12 13.414l5.775 5.775a1 1 0 001.414-1.414L13.414 12l5.775-5.775a1 1 0 00-1.414-1.414L12 10.586 6.225 4.81z"/>
                     </svg>
                 </button>
             </div>
 
-            <form class="event-form" id="eventForm">
-                <div class="form-group">
-                    <label for="eventTitle">Title <span class="required">*</span></label>
-                    <input type="text" id="eventTitle" name="title" maxlength="100" required>
-                    <span class="error-message" id="titleError"></span>
+            <form class="event-form p-6 max-sm:flex-1 max-sm:overflow-y-auto" id="eventForm">
+                <div class="form-group mb-5">
+                    <label for="eventTitle" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Title <span class="text-red-500">*</span></label>
+                    <input type="text" id="eventTitle" name="title" maxlength="100" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-base transition-colors duration-150 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 min-h-[44px]">
+                    <span class="error-message block text-sm text-red-500 mt-1 min-h-[1.25rem]" id="titleError"></span>
                 </div>
 
-                <div class="form-group">
-                    <label for="eventDate">Date <span class="required">*</span></label>
-                    <input type="date" id="eventDate" name="date" required>
-                    <span class="error-message" id="dateError"></span>
+                <div class="form-group mb-5">
+                    <label for="eventDate" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Date <span class="text-red-500">*</span></label>
+                    <input type="date" id="eventDate" name="date" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-base transition-colors duration-150 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 min-h-[44px]">
+                    <span class="error-message block text-sm text-red-500 mt-1 min-h-[1.25rem]" id="dateError"></span>
                 </div>
 
-                <div class="form-row">
+                <div class="form-row grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                     <div class="form-group">
-                        <label for="eventStartTime">Start Time</label>
-                        <input type="time" id="eventStartTime" name="startTime">
-                        <span class="error-message" id="startTimeError"></span>
+                        <label for="eventStartTime" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Start Time</label>
+                        <input type="time" id="eventStartTime" name="startTime" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-base transition-colors duration-150 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 min-h-[44px]">
+                        <span class="error-message block text-sm text-red-500 mt-1 min-h-[1.25rem]" id="startTimeError"></span>
                     </div>
 
                     <div class="form-group">
-                        <label for="eventEndTime">End Time</label>
-                        <input type="time" id="eventEndTime" name="endTime">
-                        <span class="error-message" id="endTimeError"></span>
+                        <label for="eventEndTime" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">End Time</label>
+                        <input type="time" id="eventEndTime" name="endTime" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-base transition-colors duration-150 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 min-h-[44px]">
+                        <span class="error-message block text-sm text-red-500 mt-1 min-h-[1.25rem]" id="endTimeError"></span>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="eventDescription">Description</label>
-                    <textarea id="eventDescription" name="description" rows="3" maxlength="500"></textarea>
-                    <span class="char-count" id="charCount">0 / 500</span>
-                    <span class="error-message" id="descriptionError"></span>
+                <div class="form-group mb-5">
+                    <label for="eventDescription" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Description</label>
+                    <textarea id="eventDescription" name="description" rows="3" maxlength="500" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-200 rounded-lg text-base transition-colors duration-150 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-y min-h-[80px]"></textarea>
+                    <span class="block text-xs text-slate-500 dark:text-slate-400 mt-1 text-right" id="charCount">0 / 500</span>
+                    <span class="error-message block text-sm text-red-500 mt-1 min-h-[1.25rem]" id="descriptionError"></span>
                 </div>
 
-                <div class="form-group">
-                    <label>Color</label>
-                    <div class="color-picker">
+                <div class="form-group mb-5">
+                    <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Color</label>
+                    <div class="color-picker flex gap-3 flex-wrap">
                         <input type="radio" id="color1" name="color" value="#3b82f6" checked>
-                        <label for="color1" class="color-option" style="background-color: #3b82f6;" aria-label="Blue"></label>
+                        <label for="color1" class="w-11 h-11 rounded-full cursor-pointer border-3 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #3b82f6;" aria-label="Blue"></label>
 
                         <input type="radio" id="color2" name="color" value="#ef4444">
-                        <label for="color2" class="color-option" style="background-color: #ef4444;" aria-label="Red"></label>
+                        <label for="color2" class="w-11 h-11 rounded-full cursor-pointer border-3 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #ef4444;" aria-label="Red"></label>
 
                         <input type="radio" id="color3" name="color" value="#10b981">
-                        <label for="color3" class="color-option" style="background-color: #10b981;" aria-label="Green"></label>
+                        <label for="color3" class="w-11 h-11 rounded-full cursor-pointer border-3 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #10b981;" aria-label="Green"></label>
 
                         <input type="radio" id="color4" name="color" value="#f59e0b">
-                        <label for="color4" class="color-option" style="background-color: #f59e0b;" aria-label="Orange"></label>
+                        <label for="color4" class="w-11 h-11 rounded-full cursor-pointer border-3 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #f59e0b;" aria-label="Orange"></label>
 
                         <input type="radio" id="color5" name="color" value="#8b5cf6">
-                        <label for="color5" class="color-option" style="background-color: #8b5cf6;" aria-label="Purple"></label>
+                        <label for="color5" class="w-11 h-11 rounded-full cursor-pointer border-3 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #8b5cf6;" aria-label="Purple"></label>
 
                         <input type="radio" id="color6" name="color" value="#ec4899">
-                        <label for="color6" class="color-option" style="background-color: #ec4899;" aria-label="Pink"></label>
+                        <label for="color6" class="w-11 h-11 rounded-full cursor-pointer border-3 border-transparent transition-all duration-150 hover:scale-110" style="background-color: #ec4899;" aria-label="Pink"></label>
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="button" class="button button-secondary" id="cancelButton">Cancel</button>
-                    <button type="button" class="button button-danger" id="deleteButton" style="display: none;">Delete</button>
-                    <button type="submit" class="button button-primary" id="submitButton">Create Event</button>
+                <div class="form-actions flex gap-3 justify-end mt-6 pt-4 border-t border-slate-200 dark:border-slate-600 max-sm:flex-col-reverse max-sm:p-4 max-sm:bg-slate-100 max-sm:dark:bg-slate-700 max-sm:sticky max-sm:bottom-0">
+                    <button type="button" class="inline-flex items-center justify-center px-5 py-2 text-base font-medium rounded-lg transition-all duration-200 cursor-pointer border min-h-[44px] bg-transparent text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed max-sm:w-full" id="cancelButton">Cancel</button>
+                    <button type="button" class="inline-flex items-center justify-center px-5 py-2 text-base font-medium rounded-lg transition-all duration-200 cursor-pointer border border-transparent min-h-[44px] bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed mr-auto max-sm:mr-0 max-sm:w-full max-sm:mb-3" id="deleteButton" style="display: none;">Delete</button>
+                    <button type="submit" class="inline-flex items-center justify-center px-5 py-2 text-base font-medium rounded-lg transition-all duration-200 cursor-pointer border border-transparent min-h-[44px] bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed max-sm:w-full" id="submitButton">Create Event</button>
                 </div>
             </form>
         </div>
