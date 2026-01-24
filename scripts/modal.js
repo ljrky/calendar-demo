@@ -255,8 +255,10 @@ const Modal = {
             if (window.Calendar) {
                 Calendar.render();
             }
+
+            Toast.success(this.currentEventId ? 'Event updated successfully' : 'Event created successfully');
         } else {
-            alert('Failed to save event. Please try again.');
+            Toast.error('Failed to save event. Please try again.');
         }
     },
 
@@ -285,8 +287,10 @@ const Modal = {
             if (window.Calendar) {
                 Calendar.render();
             }
+
+            Toast.success('Event deleted successfully');
         } else {
-            alert('Failed to delete event. Please try again.');
+            Toast.error('Failed to delete event. Please try again.');
         }
     }
 };

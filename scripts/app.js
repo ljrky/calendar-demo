@@ -2,11 +2,11 @@
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Calendar App initializing...');
+    Logger.log('Calendar App initializing...');
 
     // Check for localStorage support
     if (!Storage.isAvailable()) {
-        alert('This application requires localStorage support. Please use a modern browser.');
+        Toast.error('This application requires localStorage support. Please use a modern browser.', 0);
         return;
     }
 
@@ -19,31 +19,31 @@ function initializeApp() {
     try {
         // Load events from storage
         Events.init();
-        console.log('Events loaded:', Events.getAll().length);
+        Logger.log('Events loaded:', Events.getAll().length);
 
         // Initialize modal
         Modal.init();
-        console.log('Modal initialized');
+        Logger.log('Modal initialized');
 
         // Initialize calendar
         Calendar.init();
-        console.log('Calendar initialized');
+        Logger.log('Calendar initialized');
 
         // Log app statistics
         logAppStats();
 
-        console.log('Calendar App ready!');
+        Logger.log('Calendar App ready!');
 
     } catch (error) {
         console.error('Error initializing app:', error);
-        alert('An error occurred while starting the application. Please refresh the page.');
+        Toast.error('An error occurred while starting the application. Please refresh the page.', 0);
     }
 }
 
 // Log application statistics
 function logAppStats() {
     const stats = Events.getStats();
-    console.log('App Statistics:', {
+    Logger.log('App Statistics:', {
         totalEvents: stats.total,
         upcomingEvents: stats.upcoming,
         pastEvents: stats.past,
@@ -61,6 +61,16 @@ window.Validation = Validation;
 
 // Debug helper functions
 window.debugApp = {
+    // Enable debug logging
+    enableLogs() {
+        Logger.enable();
+    },
+
+    // Disable debug logging
+    disableLogs() {
+        Logger.disable();
+    },
+
     // Show all events
     showAllEvents() {
         console.table(Events.getAll());
@@ -71,7 +81,7 @@ window.debugApp = {
         if (confirm('Delete all events?')) {
             Events.deleteAll();
             Calendar.render();
-            console.log('All events deleted');
+            Toast.success('All events deleted');
         }
     },
 
@@ -126,13 +136,13 @@ window.debugApp = {
         });
 
         Calendar.render();
-        console.log(`Added ${sampleEvents.length} sample events`);
+        Toast.success(`Added ${sampleEvents.length} sample events`);
     },
 
     // Get storage info
     storageInfo() {
         const info = Storage.getStorageInfo();
-        console.log('Storage Information:', info);
+        console.table(info);
         return info;
     },
 
@@ -140,7 +150,6 @@ window.debugApp = {
     exportEvents() {
         const events = Events.getAll();
         const json = JSON.stringify(events, null, 2);
-        console.log('Events JSON:', json);
 
         // Create downloadable file
         const blob = new Blob([json], { type: 'application/json' });
@@ -154,22 +163,54 @@ window.debugApp = {
         return events;
     },
 
-    // Import events from JSON
+    // Import events from JSON (with validation)
     importEvents(jsonString) {
+        const MAX_IMPORT_SIZE = 1024 * 1024; // 1MB limit
+        const MAX_EVENTS_IMPORT = 1000; // Max events per import
+
         try {
+            // Check size before parsing
+            if (jsonString.length > MAX_IMPORT_SIZE) {
+                throw new Error('Import data too large (max 1MB)');
+            }
+
             const events = JSON.parse(jsonString);
             if (!Array.isArray(events)) {
                 throw new Error('Invalid format: must be an array');
             }
 
-            events.forEach(event => {
-                Events.createEvent(event);
+            if (events.length > MAX_EVENTS_IMPORT) {
+                throw new Error(`Too many events (max ${MAX_EVENTS_IMPORT})`);
+            }
+
+            let imported = 0;
+            events.forEach((event, index) => {
+                // Validate required fields and types
+                if (typeof event.title !== 'string' || !event.title.trim()) {
+                    console.warn(`Skipping event ${index}: missing or invalid title`);
+                    return;
+                }
+                if (typeof event.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) {
+                    console.warn(`Skipping event ${index}: invalid date format`);
+                    return;
+                }
+
+                // Only pass validated and sanitized fields
+                Events.createEvent({
+                    title: event.title,
+                    date: event.date,
+                    startTime: typeof event.startTime === 'string' ? event.startTime : '',
+                    endTime: typeof event.endTime === 'string' ? event.endTime : '',
+                    description: typeof event.description === 'string' ? event.description : '',
+                    color: typeof event.color === 'string' ? event.color : '#3b82f6'
+                });
+                imported++;
             });
 
             Calendar.render();
-            console.log(`Imported ${events.length} events`);
+            Toast.success(`Imported ${imported} of ${events.length} events`);
         } catch (error) {
-            console.error('Error importing events:', error);
+            Toast.error(`Import failed: ${error.message}`);
         }
     }
 };
@@ -196,8 +237,9 @@ if ('serviceWorker' in navigator) {
     //     .catch(err => console.log('Service Worker registration failed:', err));
 }
 
-// Log helpful debug commands
+// Log helpful debug commands (always shown)
 console.log('%cCalendar App Debug Commands:', 'color: #3b82f6; font-size: 14px; font-weight: bold;');
+console.log('%c- debugApp.enableLogs() / disableLogs()', 'color: #64748b;');
 console.log('%c- debugApp.showAllEvents()', 'color: #64748b;');
 console.log('%c- debugApp.addSampleEvents()', 'color: #64748b;');
 console.log('%c- debugApp.clearAll()', 'color: #64748b;');

@@ -105,3 +105,120 @@ Using Tailwind CSS v4 Play CDN (`@tailwindcss/browser@4`) which allows:
 4. Test keyboard navigation (Tab, Enter, Escape)
 5. Test event creation, editing, and deletion
 6. Test on mobile devices for touch interactions
+
+---
+
+# Code Review Fixes
+
+Based on comprehensive code review (January 23, 2026).
+
+**Overall Risk Level: Medium**
+
+## Critical Priority
+
+- [x] **Call Validation.sanitizeInput() on all user inputs in events.js**
+  - File: `scripts/events.js` (lines 24-43)
+  - Issue: XSS vulnerability - sanitizeInput exists but is never called
+  - Fix: Wrap title, description fields with `Validation.sanitizeInput()`
+
+- [x] **Replace Math.random() with crypto.getRandomValues() for ID generation**
+  - File: `scripts/events.js` (lines 19-21)
+  - Issue: Not cryptographically secure, uses deprecated `substr()`
+  - Fix: Use `crypto.getRandomValues(new Uint32Array(2))`
+
+- [x] **Add JSON structure and size validation for event imports**
+  - File: `scripts/app.js` (lines 158-174)
+  - Issue: No validation of imported data structure or size
+  - Fix: Add schema validation and MAX_IMPORT_SIZE check
+
+## High Priority
+
+- [x] **Replace alert() calls with toast notification system**
+  - Files: `scripts/app.js`, `scripts/storage.js`, `scripts/modal.js`
+  - Issue: alert() blocks thread and provides poor UX
+  - Fix: Create accessible toast/notification component
+
+- [x] **Add event creation limits to prevent localStorage exhaustion**
+  - File: `scripts/events.js`
+  - Issue: No limit on events, potential DoS via storage exhaustion
+  - Fix: Add MAX_EVENTS constant (e.g., 10000) with check in createEvent()
+
+## Medium Priority
+
+- [x] **Create environment-aware logging utility to replace console.log**
+  - Files: `scripts/app.js`, `scripts/events.js`
+  - Issue: Console logs expose internal state in production
+  - Fix: Create Logger utility with DEBUG_MODE check
+
+- [x] **Add error boundaries to calendar rendering**
+  - File: `scripts/calendar.js` (lines 84-120)
+  - Issue: Silent failure if rendering fails
+  - Fix: Wrap render methods in try-catch with user feedback
+
+## Low Priority
+
+- [x] **Add keyboard navigation to event badges for accessibility**
+  - File: `scripts/calendar.js` (lines 206-221)
+  - Issue: Event badges only have click handlers
+  - Fix: Add tabindex, role="button", and keydown handler
+
+---
+
+## Code Review - Review Section
+
+### Summary
+All 8 issues identified in the code review have been addressed. The calendar app now has improved security, better UX, and enhanced accessibility.
+
+### Changes Made
+
+#### New Files Created
+1. **scripts/toast.js** - Accessible toast notification system with success, error, warning, info variants
+2. **scripts/logger.js** - Environment-aware logging utility (debug mode off by default)
+
+#### Files Modified
+
+1. **index.html**
+   - Added toast container with ARIA attributes
+   - Added slide-in/slide-out animations for toasts
+   - Added script references for logger.js and toast.js
+
+2. **scripts/events.js**
+   - Added `MAX_EVENTS: 10000` limit with check in `createEvent()`
+   - Replaced `Math.random()` with `crypto.getRandomValues()` for secure ID generation
+   - Added `Validation.sanitizeInput()` calls for title and description in `createEvent()` and `updateEvent()`
+   - Replaced `console.log` with `Logger.log`
+
+3. **scripts/app.js**
+   - Replaced `alert()` calls with `Toast.error()`
+   - Replaced `console.log` with `Logger.log`
+   - Added import validation: size limit (1MB), event count limit (1000), schema validation
+   - Added `debugApp.enableLogs()` and `debugApp.disableLogs()` commands
+
+4. **scripts/storage.js**
+   - Replaced `alert()` calls with `Toast.error()`
+
+5. **scripts/modal.js**
+   - Replaced `alert()` calls with `Toast.error()`
+   - Added success toasts for event create/update/delete
+
+6. **scripts/calendar.js**
+   - Added `showRenderError()` method for error boundary UI
+   - Wrapped `render()` in try-catch with error handling
+   - Added keyboard accessibility to event badges (tabindex, role, aria-label, keydown handler)
+   - Added keyboard accessibility to count badges
+
+### Security Improvements
+- Input sanitization prevents XSS attacks
+- Cryptographically secure ID generation
+- Import validation prevents malicious JSON payloads
+- Event limits prevent localStorage exhaustion attacks
+
+### UX Improvements
+- Non-blocking toast notifications instead of alert()
+- Success feedback for CRUD operations
+- Better error messages with actionable recovery options
+
+### Accessibility Improvements
+- Event badges are now keyboard navigable (Tab, Enter, Space)
+- Toast notifications have proper ARIA attributes
+- Count badges have proper ARIA labels

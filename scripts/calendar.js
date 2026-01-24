@@ -80,10 +80,36 @@ const Calendar = {
                day === this.today.getDate();
     },
 
-    // Render calendar
+    // Render calendar with error boundary
     render() {
-        this.updateMonthHeader();
-        this.renderCalendarGrid();
+        try {
+            this.updateMonthHeader();
+            this.renderCalendarGrid();
+        } catch (error) {
+            console.error('Failed to render calendar:', error);
+            this.showRenderError();
+        }
+    },
+
+    // Show error message when rendering fails
+    showRenderError() {
+        const grid = document.getElementById('calendarGrid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'col-span-7 flex flex-col items-center justify-center p-8 text-center';
+        errorDiv.innerHTML = `
+            <svg class="w-12 h-12 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <p class="text-slate-600 dark:text-slate-400 mb-4">Failed to load calendar. Please try refreshing the page.</p>
+            <button onclick="location.reload()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                Refresh Page
+            </button>
+        `;
+        grid.appendChild(errorDiv);
+        Toast.error('Failed to render calendar');
     },
 
     // Update month header
@@ -197,6 +223,15 @@ const Calendar = {
                 e.stopPropagation();
                 this.showEventsForDay(events);
             });
+
+            // Add keyboard handler
+            countBadge.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.showEventsForDay(events);
+                }
+            });
         }
 
         return container;
@@ -205,16 +240,30 @@ const Calendar = {
     // Create event badge
     createEventBadge(event) {
         const badge = document.createElement('div');
-        badge.className = 'event-badge flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer transition-opacity duration-150 leading-tight hover:opacity-80';
+        badge.className = 'event-badge flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer transition-opacity duration-150 leading-tight hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1';
         badge.dataset.color = event.color;
         badge.textContent = event.title;
         badge.dataset.eventId = event.id;
         badge.title = this.getEventTooltip(event);
 
-        // Prevent event from bubbling to day cell
+        // Keyboard accessibility
+        badge.setAttribute('tabindex', '0');
+        badge.setAttribute('role', 'button');
+        badge.setAttribute('aria-label', `Edit event: ${event.title}`);
+
+        // Click handler
         badge.addEventListener('click', (e) => {
             e.stopPropagation();
             Modal.openEditMode(event.id);
+        });
+
+        // Keyboard handler
+        badge.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                Modal.openEditMode(event.id);
+            }
         });
 
         return badge;
@@ -223,9 +272,15 @@ const Calendar = {
     // Create count badge
     createCountBadge(count) {
         const badge = document.createElement('div');
-        badge.className = 'event-count inline-flex items-center justify-center px-1.5 py-0.5 text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-medium cursor-pointer mt-0.5 hover:text-slate-800 dark:hover:text-slate-200';
+        badge.className = 'event-count inline-flex items-center justify-center px-1.5 py-0.5 text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-medium cursor-pointer mt-0.5 hover:text-slate-800 dark:hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded';
         badge.textContent = `+${count} more`;
         badge.title = `${count} more events on this day`;
+
+        // Keyboard accessibility
+        badge.setAttribute('tabindex', '0');
+        badge.setAttribute('role', 'button');
+        badge.setAttribute('aria-label', `Show ${count} more events`);
+
         return badge;
     },
 

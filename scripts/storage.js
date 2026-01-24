@@ -69,10 +69,10 @@ const Storage = {
             // Handle quota exceeded error
             if (error.name === 'QuotaExceededError') {
                 console.error('localStorage quota exceeded');
-                alert('Storage limit reached. Please delete some events to continue.');
+                Toast.error('Storage limit reached. Please delete some events to continue.');
             } else {
                 console.error('Error saving events to localStorage:', error);
-                alert('Failed to save events. Please try again.');
+                Toast.error('Failed to save events. Please try again.');
             }
             return false;
         }

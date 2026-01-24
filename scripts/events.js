@@ -1,6 +1,9 @@
 // Events module for managing event CRUD operations
 
 const Events = {
+    // Configuration
+    MAX_EVENTS: 10000,
+
     // In-memory cache of events
     events: [],
 
@@ -15,13 +18,23 @@ const Events = {
         return this.events;
     },
 
-    // Generate unique ID for new event
+    // Generate unique ID for new event (cryptographically secure)
     generateId() {
-        return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        const timestamp = Date.now().toString(36);
+        const randomPart = crypto.getRandomValues(new Uint32Array(2))
+            .reduce((acc, val) => acc + val.toString(36), '');
+        return `${timestamp}-${randomPart}`;
     },
 
     // Create a new event
     createEvent(eventData) {
+        // Check event limit
+        if (this.events.length >= this.MAX_EVENTS) {
+            console.error('Maximum event limit reached');
+            Toast.error(`Maximum event limit (${this.MAX_EVENTS}) reached. Please delete some events.`);
+            return null;
+        }
+
         // Validate required fields
         if (!eventData.title || !eventData.date) {
             console.error('Title and date are required');
@@ -32,11 +45,11 @@ const Events = {
 
         const newEvent = {
             id: this.generateId(),
-            title: eventData.title.trim(),
+            title: Validation.sanitizeInput(eventData.title),
             date: eventData.date,
             startTime: eventData.startTime || '',
             endTime: eventData.endTime || '',
-            description: eventData.description ? eventData.description.trim() : '',
+            description: Validation.sanitizeInput(eventData.description || ''),
             color: eventData.color || '#3b82f6',
             createdAt: now,
             updatedAt: now
@@ -46,7 +59,7 @@ const Events = {
 
         // Save to storage
         if (Storage.saveEvents(this.events)) {
-            console.log('Event created:', newEvent.id);
+            Logger.log('Event created:', newEvent.id);
             return newEvent;
         } else {
             // Rollback if save failed
@@ -86,14 +99,14 @@ const Events = {
         // Create backup for rollback
         const backup = { ...this.events[index] };
 
-        // Update event fields
+        // Update event fields (sanitize user input)
         const updatedEvent = {
             ...this.events[index],
-            title: eventData.title ? eventData.title.trim() : this.events[index].title,
+            title: eventData.title ? Validation.sanitizeInput(eventData.title) : this.events[index].title,
             date: eventData.date || this.events[index].date,
             startTime: eventData.startTime !== undefined ? eventData.startTime : this.events[index].startTime,
             endTime: eventData.endTime !== undefined ? eventData.endTime : this.events[index].endTime,
-            description: eventData.description !== undefined ? eventData.description.trim() : this.events[index].description,
+            description: eventData.description !== undefined ? Validation.sanitizeInput(eventData.description) : this.events[index].description,
             color: eventData.color || this.events[index].color,
             updatedAt: new Date().toISOString()
         };
@@ -102,7 +115,7 @@ const Events = {
 
         // Save to storage
         if (Storage.saveEvents(this.events)) {
-            console.log('Event updated:', id);
+            Logger.log('Event updated:', id);
             return updatedEvent;
         } else {
             // Rollback if save failed
@@ -128,7 +141,7 @@ const Events = {
 
         // Save to storage
         if (Storage.saveEvents(this.events)) {
-            console.log('Event deleted:', id);
+            Logger.log('Event deleted:', id);
             return true;
         } else {
             // Rollback if save failed
@@ -143,7 +156,7 @@ const Events = {
         this.events = [];
 
         if (Storage.saveEvents(this.events)) {
-            console.log('All events deleted');
+            Logger.log('All events deleted');
             return true;
         } else {
             this.events = backup;
